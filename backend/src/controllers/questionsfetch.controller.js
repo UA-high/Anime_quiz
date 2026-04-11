@@ -6,18 +6,8 @@ const picqsModel = require("../models/picqs.model");
 async function fetchMcq(req, res) {
   const { type, count } = req.body;
 
-  const token = req.cookies.token;
-
-  // const decoded = jwt.verify(token, JWT_SECRET);
-
-  if (!token) {
-    return res.status(401).json({
-      message: "Unauthorized",
-    });
-  }
   if (type === "mcq") {
     try {
-      jwt.verify(token, JWT_SECRET);
       const n = Math.min(parseInt(count) || 10, 50);
 
       const questions = await mcqModel.aggregate([{ $sample: { size: n } }]);
@@ -32,7 +22,6 @@ async function fetchMcq(req, res) {
     }
   } else if (type === "picq") {
     try {
-      jwt.verify(token, JWT_SECRET);
       const n = Math.min(parseInt(count) || 10, 50);
 
       const questions = await picqsModel.aggregate([{ $sample: { size: n } }]);
