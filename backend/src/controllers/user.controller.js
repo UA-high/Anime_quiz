@@ -1,5 +1,3 @@
-const { JWT_SECRET } = require("../config/config");
-const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.model");
 
 async function fetchDashboard(req, res) {

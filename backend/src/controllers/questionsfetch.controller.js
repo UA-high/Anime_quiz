@@ -1,5 +1,3 @@
-const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../config/config");
 const mcqModel = require("../models/mcq.model");
 const picqsModel = require("../models/picqs.model");
 

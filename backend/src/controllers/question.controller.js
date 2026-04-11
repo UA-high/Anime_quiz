@@ -1,7 +1,4 @@
-const mcq = require("../models/mcq.model");
 const picqsModel = require("../models/picqs.model");
-const jwt = require("jsonwebtoken");
-const config = require("../config/config");
 const uploadToCloud = require("../services/uploadImage.service");
 const mcqModel = require("../models/mcq.model");
 
