@@ -3,22 +3,27 @@ const mongoose = require("mongoose");
 const mcq = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
+    required: [true, "Title is required"],
   },
   desc: {
     type: String,
-    required: true,
+    required: [true, "Desc is required"],
   },
-  ans:{
+  ans: {
     type: String,
-    required: true
+    required: [true, "Answer is required"],
   },
   opts: {
     type: [String],
-    required: true,
+    required: [true, "Options are required"],
   },
   image: {
     type: String,
+  },
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "admin",
+    required: [true, "Author name is required"],
   },
 });
 
