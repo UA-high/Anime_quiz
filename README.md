@@ -110,9 +110,37 @@ IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
     npm install
     npm run dev
     ```
-2.  **Frontend:**
-    ```bash
-    cd frontend
-    npm install
-    npm run dev
-    ```
+### Frontend Setup
+2. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+
+### Access Token & Refresh Token implementation
+1. Generate the access token and refresh token while login and register
+2. Send the access token with the response and save the refresh token in the cookies
+3. After expiration of access token every 15min generate a new access token using the refresh token and also for the security purposes generate the refresh token as well
+4. The access token in saved in the frontend memory and sends the access token in the request headers to verify with every request
+---
+
+## ✨ Features
+- **User Authentication:** Secure registration and login using JWT and cookies.
+- **Admin Panel:** Upload new questions directly to the database.
+- **Quiz variety:** Supports both standard MCQs and picture-based questions.
+- **Dynamic Dashboard:** Personalized user dashboard fetching progress/stats.
+
+### Scoring System
+The scoring system is implemented
++5 for correct answer
+-2 for incorrect
+negative numbers for total score is supported
+>>>>>>> 5aea5bd (scoring-feature-implemented)
