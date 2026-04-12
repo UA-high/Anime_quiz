@@ -3,7 +3,9 @@ const { JWT_SECRET } = require("../config/config");
 
 // Base auth function to avoid redundancy
 const verifyToken = (req, res) => {
-  const token = req.cookies.token;
+
+  //Get the token from the req.headers 
+  const token = req.headers.authorization?.split(" ")[1];
   if (!token) return null;
 
   try {
@@ -11,6 +13,7 @@ const verifyToken = (req, res) => {
   } catch (err) {
     return null;
   }
+
 };
 
 async function authAdmin(req, res, next) {

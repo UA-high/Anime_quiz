@@ -101,6 +101,12 @@ A full-stack Anime Quiz application built with Express.js and MongoDB on the bac
    npm run dev
    ```
 
+
+### Access Token & Refresh Token implementation
+1. Generate the access token and refresh token while login and register
+2. Send the access token with the response and save the refresh token in the cookies
+3. After expiration of access token every 15min generate a new access token using the refresh token and also for the security purposes generate the refresh token as well
+4. The access token in saved in the frontend memory and sends the access token in the request headers to verify with every request
 ---
 
 ## ✨ Features

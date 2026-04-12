@@ -25,18 +25,36 @@ async function register(req, res) {
     role,
   });
 
-  const token = jwt.sign(
+  //Generate an access token (saving it only to the memory)
+  const accessToken = jwt.sign(
     {
       id: user._id,
       role: user.role,
     },
     JWT_SECRET,
     {
-      expiresIn: "1d",
+      expiresIn: "15m",
     },
   );
 
-  res.cookie("token", token);
+  //Generate a refreshToken and save it to the cookie storage
+  const refreshToken = jwt.sign(
+    {
+      id: user._id,
+      role: user.role
+    },
+    JWT_SECRET,
+    {
+      expiresIn: "7d"
+    }
+  )
+
+  res.cookie("token", refreshToken,{
+    httpOnly:true,
+    secure:true,
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
 
   return res.status(200).json({
     message: "User created successfully",
@@ -46,6 +64,7 @@ async function register(req, res) {
       email: user.email,
       role: user.role,
     },
+    token:accessToken
   });
 }
 
@@ -68,18 +87,34 @@ async function login(req, res) {
     return res.status(401).json({ message: "Invalid credentials" });
   }
 
-  const token = jwt.sign(
+  const accessToken = jwt.sign(
     {
       id: user._id,
       role: user.role,
     },
     JWT_SECRET,
     {
-      expiresIn: "1d",
+      expiresIn: "15m",
     },
   );
 
-  res.cookie("token", token);
+  const refreshToken = jwt.sign(
+    {
+      id: user._id,
+      role: user.role
+    },
+    JWT_SECRET,
+    {
+      expiresIn: "7d"
+    }
+  )
+
+  res.cookie("token", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
 
   res.status(200).json({
     message: "User logged in successfully",
@@ -87,7 +122,59 @@ async function login(req, res) {
       id: user._id,
       username: user.username,
     },
+    token:accessToken
   });
+}
+
+async function refreshedAccessToken(req, res) {
+  const refreshToken = req.cookie.token
+  if(!refreshToken){
+    return res.status(401).json({
+      messege:"Forbidden"
+    })
+  }
+
+  const decoded = jwt.verify(
+    refreshToken,
+    JWT_SECRET
+  )
+
+  //Generate a new access token using the decoded id and role from refresh token
+  const accessToken = jwt.sign(
+    {
+      id:decoded.id,
+      role:decoded.role
+    },
+    JWT_SECRET,
+    {
+      expiresIn: "15m",
+    }
+  )
+
+  //For security purposes generate a new refreshToken as well
+  const newRefreshToken = jwt.sign(
+    {
+      id:decoded.id,
+      role:decoded.role
+    },
+    JWT_SECRET,
+    {
+      expiresIn: "7d"
+    }
+  )
+
+  //Save the newly made refresh token in the cookies
+  res.cookie("token", newRefreshToken, {
+    httpOnly:true,
+    secure:true,
+    sameSite:"secure",
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  })
+
+  res.status(200).json({
+    messege:"Access token refreshed successfully",
+    accessToken
+  })
 }
 
 async function logout(req, res) {
@@ -97,4 +184,4 @@ async function logout(req, res) {
   });
 }
 
-module.exports = { register, login, logout };
+module.exports = { register, login, logout, refreshedAccessToken };

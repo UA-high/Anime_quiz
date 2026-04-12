@@ -9,6 +9,10 @@ const mcq = new mongoose.Schema({
     type: String,
     required: true,
   },
+  ans:{
+    type: String,
+    required: true
+  },
   opts: {
     type: [String],
     required: true,
