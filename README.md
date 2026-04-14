@@ -143,4 +143,7 @@ The scoring system is implemented
 +5 for correct answer
 -2 for incorrect
 negative numbers for total score is supported
->>>>>>> 5aea5bd (scoring-feature-implemented)
+
+
+### Frontend Features
+>> A cool looking cartoonish paperpop dashboard is added
