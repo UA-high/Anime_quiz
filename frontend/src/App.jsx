@@ -8,6 +8,7 @@ import Leaderboard from "./components/Leaderboard";
 import FinalCTA    from "./components/FinalCTA";
 import Footer      from "./components/Footer";
 import T           from "./tokens";
+import PaperPopDashboard from "./pages/PaperPopDashboard";
 
 export default function App() {
   return (
@@ -31,6 +32,10 @@ export default function App() {
       <Leaderboard />
       <FinalCTA />
       <Footer />
+      
+      {/*PaperPopDashboard is working*/}
+      {/* <PaperPopDashboard /> */}
+      
     </div>
   );
 }

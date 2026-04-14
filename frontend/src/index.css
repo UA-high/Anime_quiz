@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Patrick+Hand&display=swap');
+
+body {
+  background-color: #fdfbf7;
+  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: #1e1e1e;
+  font-family: 'Outfit', sans-serif;
+}
+
+.font-sketch {
+  font-family: 'Patrick Hand', cursive;
+}
+
+/* The "Wobbly" Border Radius Class */
+.shape-wobble {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+.shape-wobble-sm {
+  border-radius: 50px 5px 40px 5px / 5px 40px 5px 50px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #000; border-radius: 10px; border: 2px solid #fdfbf7; }
