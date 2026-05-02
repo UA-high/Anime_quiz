@@ -2,10 +2,10 @@ import T from "../tokens";
 import { useScrollReveal } from "./shared";
 
 const STATS = [
-  { val: "$0",   label: "Entry Cost",    bg: T.lavender, icon: "💸" },
-  { val: "10K+", label: "Questions",     bg: T.coral,    icon: "📚" },
-  { val: "2M+",  label: "Quizzes Taken", bg: T.mint,     icon: "🎯" },
-  { val: "800+", label: "Anime Titles",  bg: T.yellow,   icon: "🎌" },
+  { val: "$0", label: "Entry Cost", bg: T.lavender, icon: "💸" },
+  { val: "10K+", label: "Questions", bg: T.coral, icon: "📚" },
+  { val: "2M+", label: "Quizzes Taken", bg: T.mint, icon: "🎯" },
+  { val: "800+", label: "Anime Titles", bg: T.yellow, icon: "🎌" },
 ];
 
 export default function StatsBar() {

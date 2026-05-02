@@ -80,7 +80,7 @@ export function Squiggle({ color = T.yellow, width = 120, style = {} }) {
   return (
     <svg width={width} height="18" viewBox={`0 0 ${width} 18`} fill="none" style={style}>
       <path
-        d={`M0 9 Q${width*0.1} 2 ${width*0.2} 9 Q${width*0.3} 16 ${width*0.4} 9 Q${width*0.5} 2 ${width*0.6} 9 Q${width*0.7} 16 ${width*0.8} 9 Q${width*0.9} 2 ${width} 9`}
+        d={`M0 9 Q${width * 0.1} 2 ${width * 0.2} 9 Q${width * 0.3} 16 ${width * 0.4} 9 Q${width * 0.5} 2 ${width * 0.6} 9 Q${width * 0.7} 16 ${width * 0.8} 9 Q${width * 0.9} 2 ${width} 9`}
         stroke={color} strokeWidth="3.5" strokeLinecap="round" fill="none"
       />
     </svg>

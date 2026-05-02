@@ -3,11 +3,11 @@ import T from "../tokens";
 import { Tag, Card, useScrollReveal } from "./shared";
 
 const LB = [
-  { rank: 1, name: "ShadowNinja_X", pts: "9,850", cat: "Shonen",        badge: "🥇", bg: T.yellow   },
-  { rank: 2, name: "SakuraQueen",   pts: "9,200", cat: "Ghibli",         badge: "🥈", bg: T.lavender },
-  { rank: 3, name: "OtakuGod99",    pts: "8,750", cat: "Psychological",  badge: "🥉", bg: T.coral    },
-  { rank: 4, name: "AnimeForever",  pts: "8,100", cat: "Isekai",         badge: "⭐", bg: T.white    },
-  { rank: 5, name: "MangaWizard",   pts: "7,650", cat: "Mecha",          badge: "⭐", bg: T.white    },
+  { rank: 1, name: "ShadowNinja_X", pts: "9,850", cat: "Shonen", badge: "🥇", bg: T.yellow },
+  { rank: 2, name: "SakuraQueen", pts: "9,200", cat: "Ghibli", badge: "🥈", bg: T.lavender },
+  { rank: 3, name: "OtakuGod99", pts: "8,750", cat: "Psychological", badge: "🥉", bg: T.coral },
+  { rank: 4, name: "AnimeForever", pts: "8,100", cat: "Isekai", badge: "⭐", bg: T.white },
+  { rank: 5, name: "MangaWizard", pts: "7,650", cat: "Mecha", badge: "⭐", bg: T.white },
 ];
 
 const CAT_COLORS = [T.yellow, T.lavender, T.coral, T.mint, T.sky];

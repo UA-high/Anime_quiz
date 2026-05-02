@@ -10,10 +10,10 @@ export default function FinalCTA() {
       borderTop: T.border, position: "relative", overflow: "hidden",
     }}>
       {/* Decorative background stars */}
-      <Star size={48} color={T.yellow}   style={{ position: "absolute", top: "20%",    left: "8%",   opacity: 0.5, transform: "rotate(-20deg)" }} />
-      <Star size={32} color={T.lavender} style={{ position: "absolute", top: "30%",    right: "10%", opacity: 0.4, transform: "rotate(15deg)"  }} />
-      <Star size={60} color={T.coral}    style={{ position: "absolute", bottom: "20%", left: "15%",  opacity: 0.3, transform: "rotate(5deg)"   }} />
-      <Star size={24} color={T.mint}     style={{ position: "absolute", bottom: "25%", right: "8%",  opacity: 0.5, transform: "rotate(-10deg)" }} />
+      <Star size={48} color={T.yellow} style={{ position: "absolute", top: "20%", left: "8%", opacity: 0.5, transform: "rotate(-20deg)" }} />
+      <Star size={32} color={T.lavender} style={{ position: "absolute", top: "30%", right: "10%", opacity: 0.4, transform: "rotate(15deg)" }} />
+      <Star size={60} color={T.coral} style={{ position: "absolute", bottom: "20%", left: "15%", opacity: 0.3, transform: "rotate(5deg)" }} />
+      <Star size={24} color={T.mint} style={{ position: "absolute", bottom: "25%", right: "8%", opacity: 0.5, transform: "rotate(-10deg)" }} />
 
       <div ref={ref} style={{
         textAlign: "center", position: "relative", zIndex: 2,

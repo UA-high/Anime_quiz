@@ -69,10 +69,10 @@ async function register(req, res) {
 }
 
 async function login(req, res) {
-  const { username, email, password } = req.body;
+  const { email, password } = req.body;
 
   const user = await userModel.findOne({
-    $or: [{ username }, { email }],
+    email,
   });
 
   if (!user) {
@@ -121,6 +121,8 @@ async function login(req, res) {
     user: {
       id: user._id,
       username: user.username,
+      email: user.email,
+      role: user.role
     },
     token:accessToken
   });
