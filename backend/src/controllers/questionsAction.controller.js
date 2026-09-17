@@ -3,7 +3,8 @@ const picqsModel = require("../models/picqs.model");
 const userModel = require("../models/user.model")
 
 async function fetchQuiz(req, res) {
-  const { type, count } = req.body;
+  const type = req.query.type || req.body?.type || "mcq";
+  const count = req.query.count || req.body?.count || 10;
 
   if (type === "mcq") {
     try {
@@ -35,6 +36,8 @@ async function fetchQuiz(req, res) {
       console.log(err);
       res.status(500).json({ message: "Server error" });
     }
+  } else {
+    res.status(400).json({ message: "Invalid question type. Must be 'mcq' or 'picq'." });
   }
 }
 

@@ -4,49 +4,79 @@ const mcqModel = require("../models/mcq.model");
 
 // Function to upload MCQs
 async function uploadMcqQuestions(req, res) {
-  const { title, desc, opts } = req.body;
+  try {
+    const { title, desc, opts, ans } = req.body;
 
-  let result = undefined;
+    let parsedOpts = opts;
+    if (typeof opts === "string") {
+      try {
+        parsedOpts = JSON.parse(opts);
+      } catch (e) {
+        parsedOpts = opts.split(",").map((s) => s.trim());
+      }
+    }
 
-  if (req.file) {
-    const file = req.file;
-    //Upload the image to the image kit cloud
-    result = await uploadToCloud(file.buffer);
+    let result = undefined;
+    if (req.file) {
+      const file = req.file;
+      result = await uploadToCloud(file.buffer);
+    }
+
+    const question = await mcqModel.create({
+      title,
+      desc,
+      ans,
+      opts: parsedOpts,
+      image: result ? result.url : (req.body.image || ""),
+      author: req.user.id,
+    });
+
+    res.status(200).json({
+      message: "Question uploaded successfully",
+      question,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to upload MCQ question", error: err.message });
   }
-
-  //Upload the question to database
-  const question = await mcqModel.create({
-    title,
-    desc,
-    opts,
-    image: result ? result.url : "",
-  });
-
-  res.status(200).json({
-    messege: "Question uploaded successfully",
-    question,
-  });
 }
 
 // Upload picture questions
 async function uploadPictureQuestions(req, res) {
-  const file = req.file;
+  try {
+    const { hints, ans } = req.body;
 
-  //Need to pass the ans as an array of Strings from the fontend
-  const { hints, ans } = req.body;
+    let parsedHints = hints;
+    if (typeof hints === "string") {
+      try {
+        parsedHints = JSON.parse(hints);
+      } catch (e) {
+        parsedHints = hints.split(",").map((s) => s.trim());
+      }
+    }
 
-  const result = await uploadToCloud(file.buffer);
+    let imageUrl = req.body.image || "";
+    if (req.file) {
+      const file = req.file;
+      const result = await uploadToCloud(file.buffer);
+      imageUrl = result.url;
+    }
 
-  const question = await picqsModel.create({
-    image: result.url,
-    hints,
-    ans,
-  });
+    const question = await picqsModel.create({
+      image: imageUrl,
+      hints: parsedHints,
+      ans,
+      author: req.user.id,
+    });
 
-  res.status(200).json({
-    messege: "Questions is uploaded successfully",
-    question,
-  });
+    res.status(200).json({
+      message: "Question uploaded successfully",
+      question,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to upload picture question", error: err.message });
+  }
 }
 
 module.exports = { uploadMcqQuestions, uploadPictureQuestions };

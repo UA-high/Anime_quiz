@@ -49,12 +49,15 @@ async function register(req, res) {
     }
   )
 
-  res.cookie("token", refreshToken,{
-    httpOnly:true,
-    secure:true,
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  });
+  const isProduction = process.env.NODE_ENV === "production";
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "strict" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  };
+
+  res.cookie("token", refreshToken, cookieOptions);
 
   return res.status(200).json({
     message: "User created successfully",
@@ -64,7 +67,7 @@ async function register(req, res) {
       email: user.email,
       role: user.role,
     },
-    token:accessToken
+    token: accessToken,
   });
 }
 
@@ -101,20 +104,23 @@ async function login(req, res) {
   const refreshToken = jwt.sign(
     {
       id: user._id,
-      role: user.role
+      role: user.role,
     },
     JWT_SECRET,
     {
-      expiresIn: "7d"
-    }
-  )
+      expiresIn: "7d",
+    },
+  );
 
-  res.cookie("token", refreshToken, {
+  const isProduction = process.env.NODE_ENV === "production";
+  const cookieOptions = {
     httpOnly: true,
-    secure: true,
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  });
+    secure: isProduction,
+    sameSite: isProduction ? "strict" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  };
+
+  res.cookie("token", refreshToken, cookieOptions);
 
   res.status(200).json({
     message: "User logged in successfully",
@@ -122,65 +128,80 @@ async function login(req, res) {
       id: user._id,
       username: user.username,
       email: user.email,
-      role: user.role
+      role: user.role,
+      totalScore: user.totalScore,
     },
-    token:accessToken
+    token: accessToken,
   });
 }
 
 async function refreshedAccessToken(req, res) {
-  const refreshToken = req.cookie.token
-  if(!refreshToken){
+  const refreshToken = req.cookies?.token;
+  if (!refreshToken) {
     return res.status(401).json({
-      messege:"Forbidden"
-    })
+      message: "Forbidden: No refresh token provided",
+    });
   }
 
-  const decoded = jwt.verify(
-    refreshToken,
-    JWT_SECRET
-  )
+  try {
+    const decoded = jwt.verify(refreshToken, JWT_SECRET);
 
-  //Generate a new access token using the decoded id and role from refresh token
-  const accessToken = jwt.sign(
-    {
-      id:decoded.id,
-      role:decoded.role
-    },
-    JWT_SECRET,
-    {
-      expiresIn: "15m",
-    }
-  )
+    // Generate a new access token using the decoded id and role from refresh token
+    const accessToken = jwt.sign(
+      {
+        id: decoded.id,
+        role: decoded.role,
+      },
+      JWT_SECRET,
+      {
+        expiresIn: "15m",
+      },
+    );
 
-  //For security purposes generate a new refreshToken as well
-  const newRefreshToken = jwt.sign(
-    {
-      id:decoded.id,
-      role:decoded.role
-    },
-    JWT_SECRET,
-    {
-      expiresIn: "7d"
-    }
-  )
+    // For security purposes generate a new refreshToken as well
+    const newRefreshToken = jwt.sign(
+      {
+        id: decoded.id,
+        role: decoded.role,
+      },
+      JWT_SECRET,
+      {
+        expiresIn: "7d",
+      },
+    );
 
-  //Save the newly made refresh token in the cookies
-  res.cookie("token", newRefreshToken, {
-    httpOnly:true,
-    secure:true,
-    sameSite:"secure",
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  })
+    const isProduction = process.env.NODE_ENV === "production";
+    const cookieOptions = {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "strict" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    };
 
-  res.status(200).json({
-    messege:"Access token refreshed successfully",
-    accessToken
-  })
+    // Save the newly made refresh token in the cookies
+    res.cookie("token", newRefreshToken, cookieOptions);
+
+    const user = await userModel.findById(decoded.id).select("-password");
+
+    res.status(200).json({
+      message: "Access token refreshed successfully",
+      accessToken,
+      user,
+    });
+  } catch (err) {
+    return res.status(401).json({
+      message: "Invalid or expired refresh token",
+    });
+  }
 }
 
 async function logout(req, res) {
-  res.clearCookie("token");
+  const isProduction = process.env.NODE_ENV === "production";
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "strict" : "lax",
+  });
   res.status(200).json({
     message: "User logged out successfully",
   });
