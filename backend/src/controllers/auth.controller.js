@@ -3,6 +3,22 @@ const bcrypt = require("bcrypt");
 const userModel = require("../models/user.model");
 const { JWT_SECRET } = require("../config/config");
 
+const isProduction = process.env.NODE_ENV === "production";
+
+// In production (Render backend + Vercel frontend), cross-site cookies require sameSite: "none" and secure: true.
+const getCookieOptions = () => ({
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+
+const getClearCookieOptions = () => ({
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+});
+
 async function register(req, res) {
   // console.log(req.body)
   const { username, email, password, role = "user" } = req.body;
@@ -47,17 +63,9 @@ async function register(req, res) {
     {
       expiresIn: "7d"
     }
-  )
+  );
 
-  const isProduction = process.env.NODE_ENV === "production";
-  const cookieOptions = {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "strict" : "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  };
-
-  res.cookie("token", refreshToken, cookieOptions);
+  res.cookie("token", refreshToken, getCookieOptions());
 
   return res.status(200).json({
     message: "User created successfully",
@@ -112,15 +120,7 @@ async function login(req, res) {
     },
   );
 
-  const isProduction = process.env.NODE_ENV === "production";
-  const cookieOptions = {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "strict" : "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  };
-
-  res.cookie("token", refreshToken, cookieOptions);
+  res.cookie("token", refreshToken, getCookieOptions());
 
   res.status(200).json({
     message: "User logged in successfully",
@@ -170,16 +170,8 @@ async function refreshedAccessToken(req, res) {
       },
     );
 
-    const isProduction = process.env.NODE_ENV === "production";
-    const cookieOptions = {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "strict" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    };
-
     // Save the newly made refresh token in the cookies
-    res.cookie("token", newRefreshToken, cookieOptions);
+    res.cookie("token", newRefreshToken, getCookieOptions());
 
     const user = await userModel.findById(decoded.id).select("-password");
 
@@ -196,12 +188,7 @@ async function refreshedAccessToken(req, res) {
 }
 
 async function logout(req, res) {
-  const isProduction = process.env.NODE_ENV === "production";
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "strict" : "lax",
-  });
+  res.clearCookie("token", getClearCookieOptions());
   res.status(200).json({
     message: "User logged out successfully",
   });

@@ -19,7 +19,8 @@ if(!process.env.IMAGEKIT_PRIVATE_KEY){
 const config = {
     MONGO_URI: process.env.MONGO_URI,
     JWT_SECRET: process.env.JWT_SECRET,
-    IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY
+    IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY,
+    FRONTEND_URL: process.env.FRONTEND_URL
 }
 
 module.exports = config

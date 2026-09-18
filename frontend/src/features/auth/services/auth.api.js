@@ -11,8 +11,12 @@ export const getAccessToken = () => {
   return memoryToken;
 };
 
+// Determine base URL from environment (e.g., Render backend in production)
+const rawBaseUrl = import.meta.env.VITE_API_URL || '';
+export const BASE_URL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
+
 export const api = axios.create({
-  baseURL: '',
+  baseURL: BASE_URL,
   withCredentials: true,
 });
 
@@ -72,7 +76,7 @@ api.interceptors.response.use(
 
       try {
         const refreshResponse = await axios.post(
-          '/api/auth/refresh-token',
+          `${BASE_URL}/api/auth/refresh-token`,
           {},
           { withCredentials: true }
         );
@@ -127,7 +131,7 @@ export async function logout() {
 
 // Refresh Token API
 export async function getRefreshToken() {
-  const response = await axios.post('/api/auth/refresh-token', {}, { withCredentials: true });
+  const response = await axios.post(`${BASE_URL}/api/auth/refresh-token`, {}, { withCredentials: true });
   if (response.data?.accessToken) {
     setAccessToken(response.data.accessToken);
   }
