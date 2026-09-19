@@ -12,7 +12,10 @@ export const getAccessToken = () => {
 };
 
 // Determine base URL from environment (e.g., Render backend in production)
-const rawBaseUrl = import.meta.env.VITE_API_URL || '';
+// Local development uses Vite's /api proxy. A production fallback keeps auth
+// working even when Vercel was deployed without VITE_API_URL configured.
+const rawBaseUrl = import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? 'https://anime-quiz-tg4e.onrender.com' : '');
 export const BASE_URL = rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl;
 
 export const api = axios.create({

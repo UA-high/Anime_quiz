@@ -5,6 +5,7 @@ import Login from './features/auth/pages/Login';
 import Register from './features/auth/pages/Register';
 import InterviewPage from './features/interview/pages/InterviewPage';
 import AdminUploadPage from './features/interview/pages/AdminUploadPage';
+import RoomQuizPage from './features/rooms/pages/RoomQuizPage';
 import Loader from './features/auth/components/Loader';
 import { useAuth } from './features/auth/hooks/useAuth';
 
@@ -99,6 +100,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <InterviewPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/rooms',
+    element: (
+      <ProtectedRoute>
+        <RoomQuizPage />
       </ProtectedRoute>
     ),
   },

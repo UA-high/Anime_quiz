@@ -3,25 +3,35 @@ const bcrypt = require("bcrypt");
 const userModel = require("../models/user.model");
 const { JWT_SECRET } = require("../config/config");
 
-const isProduction = process.env.NODE_ENV === "production";
+// A secure cookie cannot be stored by an HTTP localhost frontend. Use HTTPS
+// detection as the source of truth so a production-mode backend can still be
+// tested locally with FRONTEND_URL=http://localhost:5173.
+const isSecureFrontend = process.env.NODE_ENV === "production" &&
+  String(process.env.FRONTEND_URL || "").startsWith("https://");
 
 // In production (Render backend + Vercel frontend), cross-site cookies require sameSite: "none" and secure: true.
 const getCookieOptions = () => ({
   httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? "none" : "lax",
+  secure: isSecureFrontend,
+  sameSite: isSecureFrontend ? "none" : "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 });
 
 const getClearCookieOptions = () => ({
   httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? "none" : "lax",
+  secure: isSecureFrontend,
+  sameSite: isSecureFrontend ? "none" : "lax",
 });
 
 async function register(req, res) {
   // console.log(req.body)
-  const { username, email, password, role = "user" } = req.body;
+  const username = String(req.body.username || "").trim();
+  const email = String(req.body.email || "").trim().toLowerCase();
+  const { password, role = "user" } = req.body;
+
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: "Username, email, and password are required" });
+  }
 
   const isUserAlreadyPresent = await userModel.findOne({
     $or: [{ username }, { email }],
@@ -80,7 +90,12 @@ async function register(req, res) {
 }
 
 async function login(req, res) {
-  const { email, password } = req.body;
+  const email = String(req.body.email || "").trim().toLowerCase();
+  const { password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
 
   const user = await userModel.findOne({
     email,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Bell, Menu, LogOut, Zap, Trophy, Shield, Play, HelpCircle } from "lucide-react";
+import { Search, Bell, Menu, LogOut, Zap, Trophy, Shield, Play, HelpCircle, Users } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../auth/hooks/useAuth";
 
@@ -73,6 +73,14 @@ export default function PaperPopDashboard() {
                             className="hidden sm:flex items-center gap-1.5 bg-[#C4B5FD] hover:bg-[#a78bfa] border-[2.5px] border-black px-3.5 py-2 rounded-xl font-['Gabarito',sans-serif] font-black text-xs shadow-[2px_2px_0_#000] transition-all cursor-pointer active:translate-y-0.5"
                         >
                             🖼️ Guess Anime
+                        </Link>
+
+                        <Link
+                            to="/rooms"
+                            className="hidden md:flex items-center gap-1.5 bg-[#86EFAC] hover:bg-[#4ade80] border-[2.5px] border-black px-3.5 py-2 rounded-xl font-['Gabarito',sans-serif] font-black text-xs shadow-[2px_2px_0_#000] transition-all cursor-pointer active:translate-y-0.5"
+                        >
+                            <Users className="w-4 h-4" />
+                            Room Quiz
                         </Link>
 
                         {/* Admin Link if admin */}
