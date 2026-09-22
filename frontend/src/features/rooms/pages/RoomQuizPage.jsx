@@ -2,14 +2,28 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Copy, Crown, MessageCircle, Play, Send, Users } from 'lucide-react';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { getRefreshToken } from '../../auth/services/auth.api';
 import McqCard from '../../interview/components/McqCard';
 import PicqCard from '../../interview/components/PicqCard';
 import { createRoomSocket } from '../services/room.socket';
 
-const ask = (socket, event, payload = {}) => new Promise((resolve) => socket.emit(event, payload, resolve));
+const ask = (socket, event, payload = {}, timeout = 6000) =>
+  new Promise((resolve) => {
+    if (!socket || !socket.connected) {
+      return resolve({ error: 'Not connected to room server. Please wait or check your connection.' });
+    }
+    const timer = setTimeout(() => {
+      resolve({ error: 'Server request timed out. Please try again.' });
+    }, timeout);
+    socket.emit(event, payload, (res) => {
+      clearTimeout(timer);
+      resolve(res);
+    });
+  });
 
 export default function RoomQuizPage() {
   const { user, refreshUserData } = useAuth();
+  const refreshUserDataRef = useRef(refreshUserData);
   const socketRef = useRef(null);
   const [room, setRoom] = useState(null);
   const [question, setQuestion] = useState(null);
@@ -23,18 +37,63 @@ export default function RoomQuizPage() {
   const [error, setError] = useState('');
   const [clock, setClock] = useState(0);
   const [socketId, setSocketId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    refreshUserDataRef.current = refreshUserData;
+  }, [refreshUserData]);
 
   useEffect(() => {
     const socket = createRoomSocket();
     socketRef.current = socket;
-    socket.on('connect', () => setSocketId(socket.id));
-    socket.on('connect_error', () => setError('Your session expired. Please sign in again.'));
+    let refreshing = false;
+
+    socket.on('connect', () => {
+      setSocketId(socket.id);
+      setError('');
+    });
+
+    socket.on('connect_error', async (err) => {
+      if (err?.message === 'Unauthorized' && !refreshing) {
+        refreshing = true;
+        try {
+          const refreshData = await getRefreshToken();
+          if (refreshData?.accessToken) {
+            socket.connect();
+            refreshing = false;
+            return;
+          }
+        } catch (_) {
+          // Token refresh failed
+        }
+        refreshing = false;
+        setError('Your session expired. Please sign in again.');
+      } else {
+        setError(err?.message || 'Failed to connect to room server.');
+      }
+    });
+
     socket.on('room:update', setRoom);
-    socket.on('quiz:question', (data) => { setQuestion(data.question); setQuestionMeta(data); setClock(Date.now()); setAnswer(''); setFeedback(''); });
-    socket.on('quiz:finished', async (finalRoom) => { setRoom(finalRoom); setQuestion(null); setFeedback('Quiz complete — scores have been added to your profile.'); await refreshUserData(); });
+    socket.on('quiz:question', (data) => {
+      setQuestion(data.question);
+      setQuestionMeta(data);
+      setClock(Date.now());
+      setAnswer('');
+      setFeedback('');
+    });
+    socket.on('quiz:finished', async (finalRoom) => {
+      setRoom(finalRoom);
+      setQuestion(null);
+      setFeedback('Quiz complete — scores have been added to your profile.');
+      await refreshUserDataRef.current?.();
+    });
     socket.on('chat:message', (message) => setMessages((items) => [...items, message]));
-    return () => { setSocketId(''); socket.disconnect(); };
-  }, [refreshUserData]);
+
+    return () => {
+      setSocketId('');
+      socket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     if (!room?.endsAt || room.status !== 'playing') return undefined;
@@ -44,9 +103,14 @@ export default function RoomQuizPage() {
 
   const perform = async (event, payload) => {
     setError('');
-    const response = await ask(socketRef.current, event, payload);
-    if (response?.error) setError(response.error);
-    if (response?.room) setRoom(response.room);
+    setIsSubmitting(true);
+    try {
+      const response = await ask(socketRef.current, event, payload);
+      if (response?.error) setError(response.error);
+      if (response?.room) setRoom(response.room);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   const createRoom = () => perform('room:create', settings);
   const joinRoom = () => perform('room:join', { code: joinCode });
@@ -87,12 +151,24 @@ export default function RoomQuizPage() {
               <select value={settings.quizType} onChange={(e) => setSettings({ ...settings, quizType: e.target.value })} className="w-full mt-1 p-3 border-2 border-black rounded-xl font-bold bg-white"><option value="mcq">Classic MCQ</option><option value="picq">Guess the character</option></select>
               <label className="block font-black text-sm mt-3">Questions</label>
               <select value={settings.questionCount} onChange={(e) => setSettings({ ...settings, questionCount: Number(e.target.value) })} className="w-full mt-1 p-3 border-2 border-black rounded-xl font-bold bg-white"><option value="5">5</option><option value="10">10</option><option value="15">15</option></select>
-              <button onClick={createRoom} className="mt-5 w-full bg-black text-white border-2 border-black rounded-xl p-3 font-black">Create room</button>
+              <button
+                disabled={isSubmitting || !socketId}
+                onClick={createRoom}
+                className="mt-5 w-full bg-black text-white disabled:opacity-60 border-2 border-black rounded-xl p-3 font-black cursor-pointer disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Creating...' : !socketId ? 'Connecting...' : 'Create room'}
+              </button>
             </div>
             <div className="border-[2.5px] border-black rounded-2xl p-5 bg-[#86EFAC] shadow-[4px_4px_0_#111]">
               <h2 className="font-black text-xl">Join a room</h2><p className="font-bold text-sm mt-2">Ask the host for their six-character room code.</p>
               <input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} maxLength="6" placeholder="ABC123" className="mt-5 w-full p-3 border-2 border-black rounded-xl font-black tracking-[0.25em] uppercase bg-white" />
-              <button onClick={joinRoom} className="mt-3 w-full bg-white border-2 border-black rounded-xl p-3 font-black">Join room</button>
+              <button
+                disabled={isSubmitting || !socketId || !joinCode}
+                onClick={joinRoom}
+                className="mt-3 w-full bg-white disabled:opacity-60 border-2 border-black rounded-xl p-3 font-black cursor-pointer disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Joining...' : 'Join room'}
+              </button>
             </div>
           </div>
         </section>

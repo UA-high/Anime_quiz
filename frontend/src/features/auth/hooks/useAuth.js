@@ -1,6 +1,6 @@
 import { login, register, logout, getDashboard } from "../services/auth.api";
 import { AuthContext } from "../Auth.context";
-import { useContext } from "react";
+import { useContext, useCallback } from "react";
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -10,7 +10,7 @@ export const useAuth = () => {
 
   const { user, setUser, loading, setLoading, isInitialized } = context;
 
-  const handleLogin = async ({ email, password }) => {
+  const handleLogin = useCallback(async ({ email, password }) => {
     setLoading(true);
     try {
       const data = await login({ email, password });
@@ -22,9 +22,9 @@ export const useAuth = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setUser, setLoading]);
 
-  const handleRegister = async ({ username, email, password, role = "user" }) => {
+  const handleRegister = useCallback(async ({ username, email, password, role = "user" }) => {
     setLoading(true);
     try {
       const data = await register({ username, email, password, role });
@@ -36,9 +36,9 @@ export const useAuth = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setUser, setLoading]);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     setLoading(true);
     try {
       await logout();
@@ -50,9 +50,9 @@ export const useAuth = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setUser, setLoading]);
 
-  const refreshUserData = async () => {
+  const refreshUserData = useCallback(async () => {
     try {
       const data = await getDashboard();
       if (data?.user) {
@@ -63,7 +63,7 @@ export const useAuth = () => {
       console.error("Failed to refresh user data", err);
     }
     return null;
-  };
+  }, [setUser]);
 
   return {
     handleLogin,
